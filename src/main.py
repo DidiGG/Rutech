@@ -1,0 +1,90 @@
+"""
+RUTECH — Sistema de Gestión de Flotas
+TransCarga Andina S.A.S. · Universidad del Quindío · Bases de Datos 1 · 2026-1
+
+Aplicación principal con Tkinter
+"""
+
+import tkinter as tk
+import sys
+import os
+sys.path.append(os.path.dirname(__file__))
+from cruds.conductor import CRUDConductor
+from cruds.vehiculo import CRUDVehiculo
+from cruds.cliente import CRUDCliente
+from cruds.ruta import CRUDRuta
+from cruds.base import BG, ACCENT, TEXT_DIM, FONT_BODY, FONT_SM
+
+# ═════════════════════════════════════════════════════════════════════════════
+#  VENTANA PRINCIPAL con navegación lateral
+# ═════════════════════════════════════════════════════════════════════════════
+class App(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("RUTECH — Sistema de Gestión de Flotas · TransCarga Andina S.A.S.")
+        self.geometry("1200x700")
+        self.configure(bg=BG)
+        self.resizable(True, True)
+        self._build()
+
+    def _build(self):
+        # Sidebar
+        sidebar = tk.Frame(self, bg=BG, width=210)
+        sidebar.pack(side="left", fill="y")
+        sidebar.pack_propagate(False)
+
+        # Logo / Brand
+        tk.Label(sidebar, text="RUTECH", bg=BG, fg=ACCENT,
+                 font=("Courier New", 20, "bold")).pack(pady=(24,2))
+        tk.Label(sidebar, text="TransCarga Andina", bg=BG, fg=TEXT_DIM,
+                 font=("Courier New", 8)).pack()
+        tk.Frame(sidebar, bg="#23263a", height=1).pack(fill="x", padx=16, pady=16)
+
+        # Menú
+        self.pages = {}
+        nav_items = [
+            ("🧑‍✈️  Conductores", CRUDConductor),
+            ("🚛  Vehículos",    CRUDVehiculo),
+            ("🏢  Clientes",     CRUDCliente),
+            ("🗺️   Rutas",        CRUDRuta),
+        ]
+
+        self.content = tk.Frame(self, bg="#1a1d27")
+        self.content.pack(side="right", fill="both", expand=True)
+
+        self._active_btn = None
+        for label, cls in nav_items:
+            page = cls(self.content)
+            self.pages[label] = page
+            btn = tk.Button(
+                sidebar, text=label, bg=BG, fg="#e8eaf6",
+                font=FONT_BODY, relief="flat", anchor="w", bd=0,
+                padx=18, pady=10, cursor="hand2",
+                activebackground="#23263a", activeforeground=ACCENT,
+                command=lambda l=label: self._show(l)
+            )
+            btn.pack(fill="x")
+            btn.bind("<Enter>", lambda e, b=btn: b.config(bg="#23263a", fg=ACCENT))
+            btn.bind("<Leave>", lambda e, b=btn, l=label:
+                     b.config(bg=BG if l != self._current else "#23263a",
+                              fg="#e8eaf6" if l != self._current else ACCENT))
+
+        tk.Frame(sidebar, bg="#23263a", height=1).pack(fill="x", padx=16, pady=16)
+        tk.Label(sidebar, text="Bases de Datos I\nUniquindío · 2026-1",
+                 bg=BG, fg=TEXT_DIM, font=("Courier New", 8),
+                 justify="center").pack(pady=8)
+
+        self._current = None
+        first = nav_items[0][0]
+        self._show(first)
+
+    def _show(self, label):
+        self._current = label
+        for name, page in self.pages.items():
+            page.pack_forget()
+        self.pages[label].pack(fill="both", expand=True)
+
+
+if __name__ == "__main__":
+    app = App()
+    app.mainloop()

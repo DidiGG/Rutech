@@ -36,7 +36,7 @@ INSERT INTO CONDUCTOR (cedula, nombre, apellido, telefono, num_licencia, categor
 INSERT INTO VEHICULO (placa, marca, modelo, anio, tipo, kilometraje_actual, estado) VALUES
 ('ABC123', 'Chevrolet', 'NHR', 2020, 'camion', 120000, 'disponible'),
 ('DEF456', 'Hino', '300', 2021, 'camion', 90000, 'en_viaje'),
-('GHI789', 'Renault', 'Master', 2019, 'furgon', 150000, 'mantenimiento'),
+('GHI789', 'Renault', 'Master', 2019, 'furgon', 150000, 'en_mantenimiento'),
 ('JKL321', 'Ford', 'Transit', 2022, 'van', 40000, 'disponible'),
 ('MNO654', 'Isuzu', 'FRR', 2018, 'camion', 200000, 'inactivo');
 

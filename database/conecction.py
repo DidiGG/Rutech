@@ -1,18 +1,18 @@
 import mysql.connector
 
 # Configuración de la conexión
-config = {
+DB_CONFIG = {
     'user': 'root',  # cambia este usuario si no es root
     'password': 'Angel180304',  # cambia la contraseña por la tuya
     'host': 'localhost',  # aquí va la IP/nombre del servidor MySQL
     'database': 'rutech',  # la base de datos creada con schema.sql
+    'charset': 'utf8mb4',
     'raise_on_warnings': True
 }
 
-
-def get_connection():
+def get_conn():
     """Devuelve una conexión activa a la base de datos."""
-    return mysql.connector.connect(**config)
+    return mysql.connector.connect(**DB_CONFIG)
 
 
 def test_connection():
