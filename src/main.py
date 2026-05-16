@@ -13,6 +13,19 @@ from cruds.conductor import CRUDConductor
 from cruds.vehiculo import CRUDVehiculo
 from cruds.cliente import CRUDCliente
 from cruds.ruta import CRUDRuta
+from cruds.proveedor import CRUDProveedor
+from cruds.usuario import CRUDUsuario
+from cruds.tarifa import CRUDTarifa
+from cruds.contrato import CRUDContrato
+from cruds.documento_conductor import CRUDDocumentoConductor
+from cruds.documento_vehiculo import CRUDDocumentoVehiculo
+from cruds.envio import CRUDEnvio
+from cruds.detalle_envio import CRUDDetalleEnvio
+from cruds.posicion_gps import CRUDPosicionGPS
+from cruds.mantenimiento import CRUDMantenimiento
+from cruds.repuesto_mantenimiento import CRUDRepuestoMantenimiento
+from cruds.combustible import CRUDCombustible
+from cruds.viaje import CRUDViaje
 from cruds.base import BG, ACCENT, TEXT_DIM, FONT_BODY, FONT_SM
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -47,6 +60,19 @@ class App(tk.Tk):
             ("🚛  Vehículos",    CRUDVehiculo),
             ("🏢  Clientes",     CRUDCliente),
             ("🗺️   Rutas",        CRUDRuta),
+            ("🛠️  Proveedores",   CRUDProveedor),
+            ("👤  Usuarios",      CRUDUsuario),
+            ("💲  Tarifas",       CRUDTarifa),
+            ("📄  Contratos",     CRUDContrato),
+            ("📑  Docs Conductor", CRUDDocumentoConductor),
+            ("📑  Docs Vehículo",  CRUDDocumentoVehiculo),
+            ("📦  Envíos",         CRUDEnvio),
+            ("📋  Detalles Envío", CRUDDetalleEnvio),
+            ("🚧  Mantenimientos", CRUDMantenimiento),
+            ("⛽  Combustible",    CRUDCombustible),
+            ("🔧  Repuestos Mantenimiento", CRUDRepuestoMantenimiento),
+            ("🚚  Viajes",        CRUDViaje),
+            ("📡  Posiciones GPS", CRUDPosicionGPS),
         ]
 
         self.content = tk.Frame(self, bg="#1a1d27")

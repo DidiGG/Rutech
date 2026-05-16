@@ -20,7 +20,7 @@ def test_connection():
     cnx = None
     cursor = None
     try:
-        cnx = get_connection()
+        cnx = get_conn()
         cursor = cnx.cursor()
         print('Conexión exitosa.')
     except mysql.connector.Error as err:
@@ -35,7 +35,7 @@ def test_connection():
 
 def fetch_rutas(limit=5):
     """Ejemplo real: obtiene algunas rutas desde la tabla RUTA."""
-    cnx = get_connection()
+    cnx = get_conn()
     cursor = cnx.cursor()
     try:
         cursor.execute('SELECT id_ruta, nombre, origen, destino FROM RUTA LIMIT %s', (limit,))
