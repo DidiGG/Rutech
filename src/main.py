@@ -26,7 +26,14 @@ from cruds.mantenimiento import CRUDMantenimiento
 from cruds.repuesto_mantenimiento import CRUDRepuestoMantenimiento
 from cruds.combustible import CRUDCombustible
 from cruds.viaje import CRUDViaje
-from cruds.base import BG, ACCENT, TEXT_DIM, FONT_BODY, FONT_SM
+from cruds.infraccion import CRUDInfraccion
+from cruds.novedad_viaje import CRUDNovedadViaje
+from cruds.factura import CRUDFactura
+from cruds.detalle_factura import CRUDDetalleFactura
+from cruds.pago import CRUDPago
+from cruds.notificacion import CRUDNotificacion
+from cruds.reportes import CRUDReportes
+from cruds.base import BG, ACCENT, TEXT_DIM, FONT_BODY, FONT_SM, notify_upcoming_due_invoices
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  VENTANA PRINCIPAL con navegación lateral
@@ -39,12 +46,27 @@ class App(tk.Tk):
         self.configure(bg=BG)
         self.resizable(True, True)
         self._build()
+        try:
+            notify_upcoming_due_invoices()
+        except Exception:
+            pass
 
     def _build(self):
         # Sidebar
-        sidebar = tk.Frame(self, bg=BG, width=210)
-        sidebar.pack(side="left", fill="y")
-        sidebar.pack_propagate(False)
+        sidebar_container = tk.Frame(self, bg=BG, width=210)
+        sidebar_container.pack(side="left", fill="y")
+        sidebar_container.pack_propagate(False)
+
+        sidebar_canvas = tk.Canvas(sidebar_container, bg=BG, highlightthickness=0)
+        sidebar_canvas.pack(side="left", fill="both", expand=True)
+        scrollbar = tk.Scrollbar(sidebar_container, orient="vertical", command=sidebar_canvas.yview)
+        scrollbar.pack(side="right", fill="y")
+        sidebar_canvas.configure(yscrollcommand=scrollbar.set)
+
+        sidebar = tk.Frame(sidebar_canvas, bg=BG)
+        sidebar_canvas.create_window((0, 0), window=sidebar, anchor="nw")
+        sidebar.bind("<Configure>", lambda e: sidebar_canvas.configure(scrollregion=sidebar_canvas.bbox("all")))
+        sidebar_canvas.bind_all("<MouseWheel>", lambda event: sidebar_canvas.yview_scroll(int(-1 * (event.delta / 120)), "units"))
 
         # Logo / Brand
         tk.Label(sidebar, text="RUTECH", bg=BG, fg=ACCENT,
@@ -72,6 +94,13 @@ class App(tk.Tk):
             ("⛽  Combustible",    CRUDCombustible),
             ("🔧  Repuestos Mantenimiento", CRUDRepuestoMantenimiento),
             ("🚚  Viajes",        CRUDViaje),
+            ("🚨  Infracciones",   CRUDInfraccion),
+            ("⚠️  Novedades Viaje", CRUDNovedadViaje),
+            ("🧾  Facturas",      CRUDFactura),
+            ("📋  Detalle Factura", CRUDDetalleFactura),
+            ("💳  Pagos",         CRUDPago),
+            ("🔔  Notificaciones", CRUDNotificacion),
+            ("📊  Reportes",       CRUDReportes),
             ("📡  Posiciones GPS", CRUDPosicionGPS),
         ]
 

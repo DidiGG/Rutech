@@ -9,8 +9,82 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import sys
 import os
+from datetime import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 from database.conecction import get_conn
+
+
+def create_notification(id_usuario, tipo, mensaje, fecha_hora=None, leida=False):
+    if id_usuario is None:
+        return
+    if fecha_hora is None:
+        fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO NOTIFICACION (id_usuario, tipo, mensaje, fecha_hora, leida) "
+        "VALUES (%s,%s,%s,%s,%s)",
+        (id_usuario, tipo, mensaje, fecha_hora, leida)
+    )
+    conn.commit()
+    conn.close()
+
+
+def notify_invoice_state(id_factura, estado):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT creado_por, numero_factura FROM FACTURA WHERE id_factura = %s", (id_factura,))
+    row = c.fetchone()
+    conn.close()
+    if not row or row[0] is None:
+        return
+    usuario_id, numero = row
+    mensajes = {
+        'pendiente': f'Factura {numero} fue registrada y está pendiente de pago.',
+        'pagada': f'Factura {numero} ha sido pagada.',
+        'vencida': f'Factura {numero} está vencida y requiere atención.',
+        'anulada': f'Factura {numero} ha sido anulada.',
+    }
+    tipos = {
+        'pendiente': 'factura_pendiente',
+        'pagada': 'factura_pagada',
+        'vencida': 'factura_vencida',
+        'anulada': 'factura_anulada',
+    }
+    if estado in tipos:
+        create_notification(usuario_id, tipos[estado], mensajes[estado])
+
+
+def notify_upcoming_due_invoices(days=3):
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        "SELECT id_factura, numero_factura, fecha_vencimiento, creado_por "
+        "FROM FACTURA "
+        "WHERE estado = 'pendiente' "
+        "AND fecha_vencimiento BETWEEN CURRENT_DATE() AND DATE_ADD(CURRENT_DATE(), INTERVAL %s DAY)",
+        (days,)
+    )
+    rows = c.fetchall()
+    for id_factura, numero, fecha_vencimiento, creado_por in rows:
+        if creado_por is None:
+            continue
+        if isinstance(fecha_vencimiento, datetime):
+            fecha_vencimiento = fecha_vencimiento.date()
+        days_left = (fecha_vencimiento - datetime.now().date()).days
+        if days_left <= 0:
+            message = f'Factura {numero} vence hoy.'
+        else:
+            message = f'Factura {numero} vence en {days_left} días.'
+        notif_type = 'factura_por_vencer'
+        c.execute(
+            "SELECT 1 FROM NOTIFICACION WHERE tipo = %s AND mensaje = %s LIMIT 1",
+            (notif_type, message)
+        )
+        if c.fetchone():
+            continue
+        create_notification(creado_por, notif_type, message)
+    conn.close()
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  UTILIDADES DE UI
@@ -135,6 +209,7 @@ class CRUDBase(tk.Frame):
                   command=self._delete).pack(side="left", padx=(0,6))
         tk.Button(btn_row, text="🔄  Limpiar", **STYLE_BTN2,
                   command=self._clear).pack(side="left")
+        self.build_extra_buttons(btn_row)
 
         # Búsqueda
         srch = tk.Frame(body, bg=BG2)
@@ -239,6 +314,10 @@ class CRUDBase(tk.Frame):
     def _clear(self):
         self.tv.selection_remove(self.tv.selection())
         self.clear_form()
+
+    def build_extra_buttons(self, parent):
+        """Sobrescribir en subclases para agregar botones adicionales."""
+        pass
 
     # ── Para sobreescribir ────────────────────────────────────────────────────
     def build_form(self, parent):      pass
