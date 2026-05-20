@@ -33,7 +33,7 @@ from cruds.detalle_factura import CRUDDetalleFactura
 from cruds.pago import CRUDPago
 from cruds.notificacion import CRUDNotificacion
 from cruds.reportes import CRUDReportes
-from cruds.base import BG, ACCENT, TEXT_DIM, FONT_BODY, FONT_SM, notify_upcoming_due_invoices
+from cruds.base import BG, BG2, BG3, ACCENT, TEXT, TEXT_DIM, FONT_BODY, FONT_SM, notify_upcoming_due_invoices
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  VENTANA PRINCIPAL con navegación lateral
@@ -70,74 +70,95 @@ class App(tk.Tk):
 
         # Logo / Brand
         tk.Label(sidebar, text="RUTECH", bg=BG, fg=ACCENT,
-                 font=("Courier New", 20, "bold")).pack(pady=(24,2))
+                 font=("Courier New", 20, "bold")).pack(anchor="w", padx=18, pady=(24,2))
         tk.Label(sidebar, text="TransCarga Andina", bg=BG, fg=TEXT_DIM,
-                 font=("Courier New", 8)).pack()
-        tk.Frame(sidebar, bg="#23263a", height=1).pack(fill="x", padx=16, pady=16)
+                 font=("Courier New", 8)).pack(anchor="w", padx=18)
+        tk.Frame(sidebar, bg=BG3, height=1).pack(fill="x", padx=16, pady=16)
 
         # Menú
         self.pages = {}
+        self.nav_buttons = {}
         nav_items = [
-            ("🧑‍✈️  Conductores", CRUDConductor),
-            ("🚛  Vehículos",    CRUDVehiculo),
-            ("🏢  Clientes",     CRUDCliente),
-            ("🗺️   Rutas",        CRUDRuta),
-            ("🛠️  Proveedores",   CRUDProveedor),
-            ("👤  Usuarios",      CRUDUsuario),
-            ("💲  Tarifas",       CRUDTarifa),
-            ("📄  Contratos",     CRUDContrato),
-            ("📑  Docs Conductor", CRUDDocumentoConductor),
-            ("📑  Docs Vehículo",  CRUDDocumentoVehiculo),
-            ("📦  Envíos",         CRUDEnvio),
-            ("📋  Detalles Envío", CRUDDetalleEnvio),
-            ("🚧  Mantenimientos", CRUDMantenimiento),
-            ("⛽  Combustible",    CRUDCombustible),
-            ("🔧  Repuestos Mantenimiento", CRUDRepuestoMantenimiento),
-            ("🚚  Viajes",        CRUDViaje),
-            ("🚨  Infracciones",   CRUDInfraccion),
-            ("⚠️  Novedades Viaje", CRUDNovedadViaje),
-            ("🧾  Facturas",      CRUDFactura),
-            ("📋  Detalle Factura", CRUDDetalleFactura),
-            ("💳  Pagos",         CRUDPago),
-            ("🔔  Notificaciones", CRUDNotificacion),
-            ("📊  Reportes",       CRUDReportes),
-            ("📡  Posiciones GPS", CRUDPosicionGPS),
+            ("🧑‍✈️", "Conductores", CRUDConductor),
+            ("🚛", "Vehículos",    CRUDVehiculo),
+            ("🏢", "Clientes",     CRUDCliente),
+            ("🗺️", "Rutas",        CRUDRuta),
+            ("🛠️", "Proveedores",   CRUDProveedor),
+            ("👤", "Usuarios",      CRUDUsuario),
+            ("💲", "Tarifas",       CRUDTarifa),
+            ("📄", "Contratos",     CRUDContrato),
+            ("📑", "Docs Conductor", CRUDDocumentoConductor),
+            ("📑", "Docs Vehículo",  CRUDDocumentoVehiculo),
+            ("📦", "Envíos",         CRUDEnvio),
+            ("📋", "Detalles Envío", CRUDDetalleEnvio),
+            ("🚧", "Mantenimientos", CRUDMantenimiento),
+            ("⛽", "Combustible",    CRUDCombustible),
+            ("🔧", "Repuestos Mantenimiento", CRUDRepuestoMantenimiento),
+            ("🚚", "Viajes",        CRUDViaje),
+            ("🚨", "Infracciones",   CRUDInfraccion),
+            ("⚠️", "Novedades Viaje", CRUDNovedadViaje),
+            ("🧾", "Facturas",      CRUDFactura),
+            ("📋", "Detalle Factura", CRUDDetalleFactura),
+            ("💳", "Pagos",         CRUDPago),
+            ("🔔", "Notificaciones", CRUDNotificacion),
+            ("📊", "Reportes",       CRUDReportes),
+            ("📡", "Posiciones GPS", CRUDPosicionGPS),
         ]
 
-        self.content = tk.Frame(self, bg="#1a1d27")
+        self.content = tk.Frame(self, bg=BG2)
         self.content.pack(side="right", fill="both", expand=True)
 
         self._active_btn = None
-        for label, cls in nav_items:
+        for icon, label, cls in nav_items:
             page = cls(self.content)
             self.pages[label] = page
-            btn = tk.Button(
-                sidebar, text=label, bg=BG, fg="#e8eaf6",
-                font=FONT_BODY, relief="flat", anchor="w", bd=0,
-                padx=18, pady=10, cursor="hand2",
-                activebackground="#23263a", activeforeground=ACCENT,
-                command=lambda l=label: self._show(l)
-            )
-            btn.pack(fill="x")
-            btn.bind("<Enter>", lambda e, b=btn: b.config(bg="#23263a", fg=ACCENT))
-            btn.bind("<Leave>", lambda e, b=btn, l=label:
-                     b.config(bg=BG if l != self._current else "#23263a",
-                              fg="#e8eaf6" if l != self._current else ACCENT))
 
-        tk.Frame(sidebar, bg="#23263a", height=1).pack(fill="x", padx=16, pady=16)
+            row = tk.Frame(sidebar, bg=BG, cursor="hand2")
+            row.pack(fill="x")
+            row.bind("<Button-1>", lambda e, l=label: self._show(l))
+            row.bind("<Enter>", lambda e, r=row: r.config(bg=BG3))
+            row.bind("<Leave>", lambda e, r=row, l=label: self._update_nav_state(r, l))
+
+            icon_lbl = tk.Label(row, text=icon, bg=BG, fg=TEXT,
+                                font=FONT_BODY, width=2, anchor="w")
+            icon_lbl.pack(side="left", padx=(18,6), pady=12)
+            icon_lbl.bind("<Button-1>", lambda e, l=label: self._show(l))
+            icon_lbl.bind("<Enter>", lambda e, r=row: r.config(bg=BG3))
+            icon_lbl.bind("<Leave>", lambda e, r=row, l=label: self._update_nav_state(r, l))
+
+            text_lbl = tk.Label(row, text=label, bg=BG, fg=TEXT,
+                                font=FONT_BODY, anchor="w")
+            text_lbl.pack(side="left", fill="x", expand=True, pady=12)
+            text_lbl.bind("<Button-1>", lambda e, l=label: self._show(l))
+            text_lbl.bind("<Enter>", lambda e, r=row: r.config(bg=BG3))
+            text_lbl.bind("<Leave>", lambda e, r=row, l=label: self._update_nav_state(r, l))
+
+            self.nav_buttons[label] = row
+
+        tk.Frame(sidebar, bg=BG3, height=1).pack(fill="x", padx=16, pady=16)
         tk.Label(sidebar, text="Bases de Datos I\nUniquindío · 2026-1",
                  bg=BG, fg=TEXT_DIM, font=("Courier New", 8),
                  justify="center").pack(pady=8)
 
         self._current = None
-        first = nav_items[0][0]
+        first = nav_items[0][1]
         self._show(first)
+
+    def _update_nav_state(self, row, label):
+        selected = label == self._current
+        bg = BG3 if selected else BG
+        fg = ACCENT if selected else TEXT
+        row.config(bg=bg)
+        for child in row.winfo_children():
+            child.config(bg=bg, fg=fg)
 
     def _show(self, label):
         self._current = label
         for name, page in self.pages.items():
             page.pack_forget()
         self.pages[label].pack(fill="both", expand=True)
+        for name, row in self.nav_buttons.items():
+            self._update_nav_state(row, name)
 
 
 if __name__ == "__main__":

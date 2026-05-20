@@ -89,15 +89,15 @@ def notify_upcoming_due_invoices(days=3):
 # ═════════════════════════════════════════════════════════════════════════════
 #  UTILIDADES DE UI
 # ═════════════════════════════════════════════════════════════════════════════
-BG        = "#0f1117"
-BG2       = "#1a1d27"
-BG3       = "#23263a"
-ACCENT    = "#4f8ef7"
-ACCENT2   = "#f7714f"
-TEXT      = "#e8eaf6"
-TEXT_DIM  = "#7986cb"
-SUCCESS   = "#43a047"
-DANGER    = "#e53935"
+BG        = "#f8fafc"
+BG2       = "#ffffff"
+BG3       = "#eef2ff"
+ACCENT    = "#2563eb"
+ACCENT2   = "#f97316"
+TEXT      = "#111827"
+TEXT_DIM  = "#475569"
+SUCCESS   = "#16a34a"
+DANGER    = "#b91c1c"
 FONT_HEAD = ("Courier New", 13, "bold")
 FONT_BODY = ("Courier New", 11)
 FONT_SM   = ("Courier New", 9)
@@ -131,6 +131,31 @@ def styled_combo(parent, values, **kw):
                       font=FONT_BODY, state="readonly", **kw)
     return cb
 
+class ToolTip:
+    def __init__(self, widget):
+        self.widget = widget
+        self.tipwindow = None
+        self.id = None
+        self.text = ""
+
+    def show(self, text, x, y):
+        if self.tipwindow or not text:
+            return
+        self.tipwindow = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(True)
+        tw.wm_geometry(f"+{x}+{y}")
+        label = tk.Label(tw, text=text, justify="left", background="#f8fafc",
+                         foreground="#111827", relief="solid", borderwidth=1,
+                         font=("Courier New", 9), wraplength=320, padx=6, pady=4)
+        label.pack()
+
+    def hide(self):
+        tw = self.tipwindow
+        self.tipwindow = None
+        if tw:
+            tw.destroy()
+
+
 def make_treeview(parent, columns, heights=14):
     style = ttk.Style()
     style.theme_use("clam")
@@ -151,6 +176,7 @@ def make_treeview(parent, columns, heights=14):
     vsb = ttk.Scrollbar(frame, orient="vertical", command=tv.yview)
     hsb = ttk.Scrollbar(frame, orient="horizontal", command=tv.xview)
     tv.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+
 
     tv.grid(row=0, column=0, sticky="nsew")
     vsb.grid(row=0, column=1, sticky="ns")
@@ -178,6 +204,7 @@ class CRUDBase(tk.Frame):
 
     def __init__(self, parent, **kw):
         super().__init__(parent, bg=BG2, **kw)
+        self._full_row_map = {}
         self._build_ui()
 
     # ── UI principal ────────────────────────────────────────────────────────
@@ -233,16 +260,53 @@ class CRUDBase(tk.Frame):
             self.tv.column(col, width=w, anchor="center")
 
         self.tv.bind("<<TreeviewSelect>>", self._on_select)
+        self._add_treeview_tooltip()
         self._load()
+
+    def _add_treeview_tooltip(self):
+        self._tooltip = ToolTip(self.tv)
+
+        def show_tooltip(event):
+            row_id = self.tv.identify_row(event.y)
+            col = self.tv.identify_column(event.x)
+            if not row_id or not col:
+                self._tooltip.hide()
+                return
+            col_index = int(col.replace("#", "")) - 1
+            full_row = self._full_row_map.get(row_id)
+            if not full_row or col_index < 0 or col_index >= len(full_row):
+                self._tooltip.hide()
+                return
+            raw = full_row[col_index]
+            if raw is None:
+                self._tooltip.hide()
+                return
+            raw = str(raw)
+            if len(raw) > 25:
+                self._tooltip.show(raw, event.x_root + 15, event.y_root + 10)
+            else:
+                self._tooltip.hide()
+
+        self.tv.bind("<Motion>", show_tooltip)
+        self.tv.bind("<Leave>", lambda e: self._tooltip.hide())
 
     # ── CRUD DB ──────────────────────────────────────────────────────────────
     def _load(self):
         kw = self.search_var.get().strip()
         rows = self.db_read(kw)
+        self._full_row_map.clear()
         for item in self.tv.get_children():
             self.tv.delete(item)
         for r in rows:
-            self.tv.insert("", "end", values=r)
+            display_row = tuple(self._truncate_value(v) for v in r)
+            item = self.tv.insert("", "end", values=display_row)
+            self._full_row_map[item] = tuple(r)
+
+    def _truncate_value(self, value, max_len=25):
+        if value is None:
+            return ""
+        text = str(value)
+        return text if len(text) <= max_len else text[: max_len - 3] + "..."
 
     def _insert(self):
         vals = self.get_form_values()
@@ -309,7 +373,11 @@ class CRUDBase(tk.Frame):
     def _on_select(self, _event=None):
         sel = self.tv.selection()
         if sel:
-            self.set_form_values(self.tv.item(sel[0])["values"])
+            row = self._full_row_map.get(sel[0])
+            if row is not None:
+                self.set_form_values(row)
+            else:
+                self.set_form_values(self.tv.item(sel[0])["values"])
 
     def _clear(self):
         self.tv.selection_remove(self.tv.selection())

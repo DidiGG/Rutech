@@ -166,22 +166,22 @@ class CRUDReportes(tk.Frame):
         disp_x = [self._wrap_label(xx, max_len=18) for xx in x]
 
         if kind == "line":
-            ax.plot(range(n), y, marker="o", color="#4f8ef7")
+            ax.plot(range(n), y, marker="o", color=ACCENT)
             ax.set_xticks(range(n))
             ax.set_xticklabels(disp_x, rotation=0, ha="center", fontsize=9)
         else:
-            ax.bar(range(n), y, color="#4f8ef7")
+            ax.bar(range(n), y, color=ACCENT)
             ax.set_xticks(range(n))
             ax.set_xticklabels(disp_x, rotation=0, ha="center", fontsize=9)
 
-        ax.set_title(title, color="white")
+        ax.set_title(title, color=TEXT)
         ax.set_facecolor(BG3)
         fig.patch.set_facecolor(BG2)
         for spine in ax.spines.values():
-            spine.set_color("#e8eaf6")
-        ax.tick_params(colors="#e8eaf6", labelcolor="#e8eaf6")
-        ax.xaxis.label.set_color("#e8eaf6")
-        ax.yaxis.label.set_color("#e8eaf6")
+            spine.set_color(TEXT_DIM)
+        ax.tick_params(colors=TEXT, labelcolor=TEXT)
+        ax.xaxis.label.set_color(TEXT)
+        ax.yaxis.label.set_color(TEXT)
 
         # ensure labels wrap and are readable without diagonal rotation
         # center-align and increase bottom margin if needed
