@@ -92,6 +92,7 @@ def notify_upcoming_due_invoices(days=3):
 BG        = "#f8fafc"
 BG2       = "#ffffff"
 BG3       = "#eef2ff"
+BORDER    = "#dbeafe"
 ACCENT    = "#2563eb"
 ACCENT2   = "#f97316"
 TEXT      = "#111827"
@@ -170,7 +171,9 @@ def make_treeview(parent, columns, heights=14):
               background=[("selected", ACCENT)],
               foreground=[("selected", "white")])
 
-    frame = tk.Frame(parent, bg=BG)
+    frame = tk.Frame(parent, bg=BG,
+                      bd=0, highlightthickness=1,
+                      highlightbackground=BORDER, padx=4, pady=4)
     tv = ttk.Treeview(frame, columns=columns, show="headings",
                       height=heights, style="Dark.Treeview")
     vsb = ttk.Scrollbar(frame, orient="vertical", command=tv.yview)
@@ -215,7 +218,9 @@ class CRUDBase(tk.Frame):
         tk.Label(hdr, text=f"  ▸  {self.TITLE}", bg=ACCENT, fg="white",
                  font=("Courier New", 15, "bold")).pack(side="left")
 
-        body = tk.Frame(self, bg=BG2)
+        body = tk.Frame(self, bg=BG2,
+                          bd=0, highlightthickness=1,
+                          highlightbackground=BORDER)
         body.pack(fill="both", expand=True, padx=16, pady=12)
 
         # Formulario (izquierda)
@@ -239,7 +244,9 @@ class CRUDBase(tk.Frame):
         self.build_extra_buttons(btn_row)
 
         # Búsqueda
-        srch = tk.Frame(body, bg=BG2)
+        srch = tk.Frame(body, bg=BG2,
+                          bd=0, highlightthickness=1,
+                          highlightbackground=BORDER, padx=10, pady=10)
         srch.grid(row=0, column=1, rowspan=2, sticky="nw")
         tk.Label(srch, text="🔍  Buscar:", bg=BG2, fg=TEXT_DIM,
                  font=FONT_SM).pack(anchor="w")

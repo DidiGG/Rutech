@@ -33,7 +33,7 @@ from cruds.detalle_factura import CRUDDetalleFactura
 from cruds.pago import CRUDPago
 from cruds.notificacion import CRUDNotificacion
 from cruds.reportes import CRUDReportes
-from cruds.base import BG, BG2, BG3, ACCENT, TEXT, TEXT_DIM, FONT_BODY, FONT_SM, notify_upcoming_due_invoices
+from cruds.base import BG, BG2, BG3, BORDER, ACCENT, TEXT, TEXT_DIM, FONT_BODY, FONT_SM, notify_upcoming_due_invoices
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  VENTANA PRINCIPAL con navegación lateral
@@ -53,7 +53,9 @@ class App(tk.Tk):
 
     def _build(self):
         # Sidebar
-        sidebar_container = tk.Frame(self, bg=BG, width=210)
+        sidebar_container = tk.Frame(self, bg=BG, width=210,
+                                       bd=0, highlightthickness=1,
+                                       highlightbackground=BORDER)
         sidebar_container.pack(side="left", fill="y")
         sidebar_container.pack_propagate(False)
 
@@ -105,8 +107,10 @@ class App(tk.Tk):
             ("📡", "Posiciones GPS", CRUDPosicionGPS),
         ]
 
-        self.content = tk.Frame(self, bg=BG2)
-        self.content.pack(side="right", fill="both", expand=True)
+        self.content = tk.Frame(self, bg=BG2,
+                                  bd=0, highlightthickness=1,
+                                  highlightbackground=BORDER)
+        self.content.pack(side="right", fill="both", expand=True, padx=(0,12), pady=12)
 
         self._active_btn = None
         for icon, label, cls in nav_items:
